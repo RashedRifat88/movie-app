@@ -3,14 +3,15 @@ import { getImageUrl } from "../utils/cine-utility";
 import Rating from "./Rating";
 import MovieDetailsModal from "./MovieDetailsModal";
 import { MovieContext } from "../context";
-
+import { toast } from "react-toastify";
 
 
 export default function MovieCard({ movie }) {
   const [showModal, setShowModal] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  const {cartData, setCartData} = useContext(MovieContext);
+  // const {cartData, setCartData} = useContext(MovieContext);
+  const { state, dispatch } = useContext(MovieContext);
 
   function handleModalClose() {
     setSelectedMovie(null);
@@ -25,26 +26,47 @@ export default function MovieCard({ movie }) {
   function handleAddToCart(event, movie) {
     event.stopPropagation();
     console.log(movie);
-    
 
-    const found = cartData.find((item) => {
-        return item.id === movie.id;
-    })
+    const found = state.cartData.find((item) => {
+      return item.id === movie.id;
+    });
 
     console.log(found);
 
-    if(!found){
-            setCartData([...cartData, movie]);
-    }else{
-            console.error(`The movie ${movie.title} is already been added to the cart!`);
+    if (!found) {
+      // setCartData([...cartData, movie]);
+
+      dispatch({
+        type: "ADD_TO_CART",
+        payload: { ...movie },
+      });
+
+
+      toast.success(`Movie ${movie.title} added successfully`, {
+        poistion: "bottom-right"
+    });
+
+
+    } else {
+      console.error(
+        `The movie ${movie.title} is already been added to the cart!`
+      );
+
+      toast.info(`Movie ${movie.title} is already been added to the cart!`, {
+        poistion: "bottom-right"
+    });
+
     }
-    
   }
 
   return (
     <>
       {showModal && (
-        <MovieDetailsModal movie={selectedMovie} onClose={handleModalClose} onCartAdd={handleAddToCart} />
+        <MovieDetailsModal
+          movie={selectedMovie}
+          onClose={handleModalClose}
+          onCartAdd={handleAddToCart}
+        />
       )}
 
       <figure className="p-4 border border-black/10 shadow-sm dark:border-white/10 rounded-xl">
